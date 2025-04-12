@@ -1,10 +1,14 @@
-# 触发部署
 from openai import OpenAI
 import streamlit as st
 import matplotlib.pyplot as plt
-import os
 
-client = OpenAI(api_key="")
+# 设置中文字体兼容 cloud
+plt.rcParams['font.sans-serif'] = ['SimHei']
+plt.rcParams['axes.unicode_minus'] = False
+
+# 初始化 GPT 客户端
+import os
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # GPT 调用函数
 def call_gpt(role_prompt, user_input, system_role="你是一个心理角色"):
@@ -28,7 +32,7 @@ def calculate_emotion(devil, player):
     emotion_score = max(0, min(100, 50 + player_score - devil_score))
     return emotion_score
 
-# 绘图函数（去除字体设置，适配部署）
+# 绘图函数
 def plot_emotion_trajectory():
     emotion_scores = [round["emotion_score"] for round in st.session_state["rounds"]]
     plt.figure(figsize=(10, 5))
@@ -138,7 +142,6 @@ def main():
             st.write(f"💬 自我安慰：{round['player']}")
             st.write(f"🎯 情感评分：{round['emotion_score']} / 100")
         plot_emotion_trajectory()
-
         if st.button("🪞 生成自我融合总结"):
             generate_summary()
 
