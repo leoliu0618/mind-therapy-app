@@ -1,14 +1,10 @@
+# 触发部署
 from openai import OpenAI
 import streamlit as st
 import matplotlib.pyplot as plt
-from matplotlib import font_manager
-
 import os
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# 指定支持中文的字体
-font_path = "C:/Windows/Fonts/msyh.ttc"
-font_prop = font_manager.FontProperties(fname=font_path)
+client = OpenAI(api_key="")
 
 # GPT 调用函数
 def call_gpt(role_prompt, user_input, system_role="你是一个心理角色"):
@@ -32,14 +28,14 @@ def calculate_emotion(devil, player):
     emotion_score = max(0, min(100, 50 + player_score - devil_score))
     return emotion_score
 
-# 绘图函数
+# 绘图函数（去除字体设置，适配部署）
 def plot_emotion_trajectory():
     emotion_scores = [round["emotion_score"] for round in st.session_state["rounds"]]
     plt.figure(figsize=(10, 5))
     plt.plot(emotion_scores, marker='o', linestyle='-', color='b')
-    plt.title("情感转化轨迹", fontsize=16, fontproperties=font_prop)
-    plt.xlabel("疗愈轮次", fontsize=12, fontproperties=font_prop)
-    plt.ylabel("情感评分", fontsize=12, fontproperties=font_prop)
+    plt.title("情感转化轨迹", fontsize=16)
+    plt.xlabel("疗愈轮次", fontsize=12)
+    plt.ylabel("情感评分", fontsize=12)
     plt.xticks(range(len(emotion_scores)))
     plt.ylim(0, 100)
     plt.grid(True)
@@ -73,7 +69,6 @@ def generate_summary():
 """
 
     result = call_gpt(summary_prompt, "", "你是一个觉察自我情绪、接纳成长的角色")
-
     st.success("🎉 自我总结已生成：")
     st.write(result)
 
@@ -143,6 +138,7 @@ def main():
             st.write(f"💬 自我安慰：{round['player']}")
             st.write(f"🎯 情感评分：{round['emotion_score']} / 100")
         plot_emotion_trajectory()
+
         if st.button("🪞 生成自我融合总结"):
             generate_summary()
 
