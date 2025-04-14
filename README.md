@@ -19,6 +19,7 @@
 
 ---
 
+
 ## 🛠️ 环境依赖
 
 所有依赖已整理于 `requirements.txt`，包含主要依赖如下：
@@ -34,12 +35,6 @@
 ```bash
 pip install -r requirements.txt
 
-.
-├── mind_cn_web_demo.py         # 主程序
-├── C2D2_dataset.csv            # 初始化数据集（中文对话 + 情境）
-├── requirements.txt            # 所有依赖包
-├── LICENSE.txt                 # MIT 开源许可
-└── .devcontainer/              # 开发容器配置（可选）
 
 📄 License
 本项目遵循 MIT License
@@ -54,4 +49,6 @@ pip install -r requirements.txt
 HuggingFace 社区 C2D2 数据集
 
 Streamlit Cloud 部署平台
+
+
 
