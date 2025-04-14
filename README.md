@@ -15,7 +15,7 @@
 
 ## 🚀 在线体验
 
-👉 [点击访问应用](https://leo.streamlit.app)（或使用你部署后的实际链接）
+👉 [点击访问应用](https://mind-therapy-app-cxjm9dezvr5sfzasa5pcbs.streamlit.app/)
 
 ---
 
