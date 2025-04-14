@@ -34,7 +34,7 @@
 
 ```bash
 pip install -r requirements.txt
-
+```
 
 📄 License
 本项目遵循 MIT License
