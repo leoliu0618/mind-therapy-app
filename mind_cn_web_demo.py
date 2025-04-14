@@ -12,30 +12,49 @@ import random     # 导入 random
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # --- 数据集加载函数 ---
-@st.cache_data # 缓存数据加载过程
-def load_c2d2_data(filepath="C2D2_dataset.csv"): # 使用您确认的文件名
-    """从 CSV 文件加载 C2D2 数据集"""
-    try:
-        df = pd.read_csv(filepath)
-        # **重要：确认这里的列名与您的文件一致**
-        # 根据您提供的图片，列名似乎是 '场景' 和 '标签'
-        required_columns = ['场景', '标签']
-        if not all(col in df.columns for col in required_columns):
-            st.error(f"错误：数据集文件 '{filepath}' 缺少必要的列（需要 '{required_columns[0]}' 和 '{required_columns[1]}'）。")
-            return None
-        # 可选：移除缺少关键信息的行
-        df.dropna(subset=required_columns, inplace=True)
-        if df.empty:
-             st.error("错误：数据加载后或过滤后为空，请检查文件内容和必需列。")
-             return None
-        st.success(f"成功加载 C2D2 数据集: {len(df)} 条有效记录")
-        return df
-    except FileNotFoundError:
-        st.error(f"错误：无法找到数据集文件 '{filepath}'。请确保文件位于脚本运行的目录下或提供了正确路径。")
-        return None
-    except Exception as e:
-        st.error(f"加载数据集时出错: {e}")
-        return None
+@st.cache_data
+def load_c2d2_data(filepath="C2D2_dataset.csv"):
+    """从 CSV 文件加载 C2D2 数据集，尝试不同的编码"""
+    encodings_to_try = ['gb18030', 'gbk', 'utf-8'] # 尝试的编码列表，优先尝试中文编码
+    df = None
+    error_messages = []
+
+    for enc in encodings_to_try:
+        try:
+            df = pd.read_csv(filepath, encoding=enc) # **在这里指定编码**
+            st.success(f"成功使用 '{enc}' 编码加载 C2D2 数据集: {len(df)} 条记录")
+
+            # **重要：确认这里的列名与您的文件一致**
+            required_columns = ['场景', '标签'] # 确认这两个列名存在
+            if not all(col in df.columns for col in required_columns):
+                error_messages.append(f"使用 '{enc}' 编码加载成功，但缺少必要的列（需要 '{required_columns[0]}' 和 '{required_columns[1]}'）。")
+                df = None # 标记为失败，尝试下一种编码
+                continue # 继续尝试下一种编码
+
+            # 可选：移除缺少关键信息的行
+            df.dropna(subset=required_columns, inplace=True)
+            if df.empty:
+                 error_messages.append(f"使用 '{enc}' 编码加载并清理后数据为空。")
+                 df = None # 标记为失败
+                 continue # 继续尝试下一种编码
+
+            # 如果成功加载且数据有效，则跳出循环
+            return df
+
+        except UnicodeDecodeError:
+            error_messages.append(f"尝试使用 '{enc}' 编码失败 (UnicodeDecodeError)。")
+            continue # 尝试列表中的下一个编码
+        except FileNotFoundError:
+            st.error(f"错误：无法找到数据集文件 '{filepath}'。请确保文件位于正确的位置。")
+            return None # 文件不存在，直接返回 None
+        except Exception as e:
+            error_messages.append(f"加载数据集时发生其他错误 (编码 '{enc}'): {e}")
+            # 对于其他未知错误，也可能需要停止尝试
+            # return None # 标记为失败
+    # 如果所有编码都尝试失败
+    st.error("无法使用常见的编码 (gb18030, gbk, utf-8) 加载数据集。请检查文件内容或尝试指定其他编码。")
+    st.error(f"尝试记录: {'; '.join(error_messages)}")
+    return None # 所有尝试都失败，返回 None
 
 # --- Prompt Templates (严格遵循论文描述和数据流) ---
 PROMPT_TEMPLATES = {
